@@ -1,0 +1,33 @@
+# Three-Server Web Infrastructure Design for www.foobar.com
+In this exercise, the goal is to design a three-server web infrastructure with a load balancer, web server, application server, and a MySQL database. This setup addresses some common issues, such as high availability, scalability, and redundancy.
+
+# Infrastructure Overview
+## Load Balancer (HAProxy):
+Distributes incoming traffic across multiple servers to ensure load is evenly distributed and the system can handle more users without crashing.
+
+## Web Server (Nginx):
+Serves static content (e.g., HTML, CSS, JavaScript).
+Forwards requests for dynamic content (e.g., API calls or user data) to the application server.
+
+## Application Server:
+Runs the application code (your code base) and handles business logic.
+Retrieves data from the database as required by the user request.
+
+## Database (MySQL Primary-Replica setup):
+The database cluster includes a Primary (master) node and a Replica (slave) node for redundancy and scaling read operations.
+
+# Components and Distribution
+## Server 1: Load Balancer (HAProxy):
+Manages incoming requests and distributes them across multiple servers (web server, application server).
+Load balancer uses a Round-Robin distribution algorithm, meaning it sends requests to the servers in a cyclic manner, ensuring that the load is balanced evenly between them.
+
+## Server 2: Web Server (Nginx):
+Handles static content and forwards dynamic requests to the application server.
+
+## Server 3: Application Server:
+Runs the business logic and interfaces with the database for dynamic content.
+Queries the Primary database for read-write operations and can fetch data from the Replica for read-only operations.
+
+## Database (Primary-Replica Setup):
+The Primary (Master) database handles all write operations (inserts, updates).
+The Replica (Slave) database is used to scale read operations, ensuring the Primary doesn’t get overloaded with requests.
