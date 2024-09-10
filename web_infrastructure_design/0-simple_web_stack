@@ -1,0 +1,48 @@
+ # SIMPLE WEB STACK
+
+## Flow of User Request
+A user opens a browser and types www.foobar.com to access the website.
+This request is translated into an IP address via the Domain Name System (DNS), which points to the web server IP address 8.8.8.8.
+The request goes to a web server (Nginx) running on the server at 8.8.8.8.
+The web server routes the request to the application server, which processes the business logic (your code).
+The application server, if needed, fetches data from a database (MySQL).
+The processed information is sent back to the web server, which returns the result to the user's browser in the form of a web page.
+
+## Infrastructure Components
+1. **Server**
+What it is: A physical or virtual machine running the necessary software to serve web pages. This server runs the web server, application server, and database.
+Server IP Address: 8.8.8.8.
+2. **Domain Name**
+What it is: A human-readable name that maps to an IP address (like 8.8.8.8) using DNS. In this case, the domain name is foobar.com.
+Role: The domain name is used to translate user-friendly names into machine-friendly IP addresses, allowing users to access websites without knowing the IP address.
+3. **DNS Record for www.foobar.com**
+DNS Record: The www in www.foobar.com is a CNAME (Canonical Name) or an A record.
+A record: Points directly to an IP address (in this case, 8.8.8.8).
+CNAME: Points to another domain name, which in turn resolves to an IP address.
+Type of DNS Record for www: For simplicity, assume A record is used, mapping www.foobar.com directly to the server’s IP address, 8.8.8.8.
+4. **Web Server (Nginx)**
+What it is: The web server is responsible for handling incoming HTTP/HTTPS requests from the users’ browsers.
+Role: The web server (Nginx) listens on ports (typically 80 for HTTP and 443 for HTTPS), serves static content (like HTML, CSS, JS), and forwards dynamic requests to the application server.
+5. **Application Server**
+What it is: The application server runs the dynamic logic of the application (your code).
+Role: Processes dynamic requests (such as requests to fetch user data) and handles business logic. It could be something like PHP-FPM, Gunicorn, or Node.js, depending on the language and framework you're using. The web server forwards dynamic requests here.
+6. **Application Files (Codebase)**
+What it is: These are the files containing the source code of the application (like HTML, CSS, JavaScript, PHP, or Python files).
+Role: The application server executes this code to process user requests.
+7. **Database (MySQL)**
+What it is: The database stores and retrieves data (such as user information, products, etc.).
+Role: The application server queries the database when needed to retrieve or store data. The database runs on the same server as the web and application server in this scenario.
+
+## Communication
+The communication between the user's computer and the server occurs via the HTTP/HTTPS protocol over the TCP/IP network. The user’s browser sends a request to the server’s IP address (8.8.8.8), and the server responds with the requested web content.
+
+## Potential Issues with This Infrastructure
+1. **Single Point of Failure (SPOF)**
+Problem: If the single server goes down, the entire website becomes unreachable, leading to service disruption.
+Cause: All services (web server, application server, and database) are hosted on one server. If it crashes, everything fails.
+2. **Downtime during Maintenance**
+Problem: To update or restart services (like deploying new code or restarting the web server), the entire server must be stopped, causing downtime.
+Cause: There is no redundancy, and all services are hosted on the same server. For example, if Nginx needs to be restarted, the website becomes temporarily unavailable.
+3. **Inability to Scale**
+Problem: If the number of incoming users increases significantly (high traffic), the server may not be able to handle all the requests, causing slowdowns or crashes.
+Cause: Since all services (web server, app server, database) run on the same machine, the server’s resources (CPU, RAM, bandwidth) can be overwhelmed, leading to performance degradation.
