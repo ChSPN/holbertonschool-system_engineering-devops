@@ -1,0 +1,80 @@
+# Three-Server Web Infrastructure Design for www.foobar.com (Secured, Encrypted, and Monitored)
+In this exercise, we are designing a three-server web infrastructure that will host the website www.foobar.com. The infrastructure must be secured, serve encrypted traffic via HTTPS, and have monitoring systems in place to track performance and security.
+
+# Requirements:
+You must include:
+- 3 firewalls
+- 1 SSL certificate to serve the website over HTTPS
+- 3 monitoring clients (data collectors for Sumologic or other monitoring services)
+
+# Infrastructure Design Overview:
+**Load Balancer (HAProxy):**
+- Distributes incoming traffic across multiple servers.
+- SSL certificate is installed here to enable HTTPS encryption.
+
+**Web Server (Nginx):**
+- Serves static content and forwards requests for dynamic content to the application server.
+
+**Application Server:**
+- Processes dynamic content and handles the execution of application logic.
+
+**MySQL Database (Primary-Replica) :**
+- Manages the storage and retrieval of data. Uses a Primary-Replica (Master-Slave) setup for database redundancy.
+
+# Additional Security and Monitoring Elements
+**3 Firewalls:**
+Each server is protected by a firewall to control incoming and outgoing traffic based on rules.
+
+**1 SSL Certificate:**
+Installed on the load balancer to ensure that the website is served over HTTPS for encrypted communication.
+
+**3 Monitoring Clients:**
+Each server (load balancer, web server, application server) is equipped with a monitoring client to collect performance data such as traffic load, system health, and error rates.
+
+# Infrastructure Breakdown
+1. **Load Balancer (HAProxy)**
+- Why Added: The load balancer ensures high availability by distributing traffic across multiple servers and preventing any one server from being overwhelmed.
+- SSL Certificate: Installed on the load balancer to terminate SSL and serve traffic over HTTPS, ensuring encrypted data between the client and server.
+
+2. **Web Server (Nginx)**
+- Why Added: Serves static assets (like HTML, CSS, and JavaScript files) and forwards dynamic content requests to the application server.
+
+3. **Application Server**
+- Why Added: Responsible for handling business logic and generating dynamic content.
+- Database Communication: Communicates with the database to read and write data for the application.
+
+4. **MySQL Database (Primary-Replica Setup)**
+- Why Added: A Primary-Replica (Master-Slave) database setup ensures high availability and fault tolerance.
+- Primary Node (Master): Handles all write operations.
+- Replica Node (Slave): Handles read operations and replicates data from the master to ensure redundancy.
+
+# Security Components
+1. **Firewalls**
+- Why Added: Firewalls protect each part of the infrastructure by controlling access to the network. Each server is secured with a firewall that blocks unwanted traffic and ensures only authorized traffic is allowed through.
+- Purpose: The firewalls help prevent unauthorized access, DDoS attacks, and other security breaches by filtering network traffic at critical points.
+
+2. **SSL Certificate**
+- Why HTTPS: Serving the website over HTTPS ensures that all communication between the client and the server is encrypted, protecting user data from interception or tampering.
+- Role of SSL: The SSL certificate installed on the load balancer ensures that data transferred between the user's browser and the website is encrypted, enhancing privacy and security.
+
+# Monitoring Components
+1. **Monitoring Clients (e.g., Sumologic)**
+- Why Added: Monitoring clients are installed on each server to track and log metrics such as CPU usage, memory, network traffic, and the number of requests handled.
+- Purpose of Monitoring: Monitoring is essential to detect performance issues, track system health, and identify potential security threats in real time.
+- How Monitoring Works: Each server has a data collector (client) that sends performance metrics to a centralized monitoring system like Sumologic or Prometheus, where the data is analyzed and alerts are generated if any anomalies are detected.
+
+2. **Monitoring Web Server QPS (Queries Per Second)**
+- To monitor QPS for the web server, the monitoring tool would collect metrics about the number of incoming requests handled by Nginx in a given time period. This data would then be sent to a dashboard to track traffic load and detect potential performance bottlenecks.
+
+# Issues with the Infrastructure
+1. **SSL Termination at the Load Balancer**
+- Issue: If SSL termination happens at the load balancer, the traffic between the load balancer and internal servers (web server, application server, etc.) is no longer encrypted. This creates a vulnerability within the internal network.
+- Solution: Implement end-to-end SSL encryption, where SSL encryption is maintained from the client to the load balancer and between the load balancer and backend servers.
+
+2. **Single MySQL Primary Server**
+- Issue: Having only one MySQL Primary (Master) server capable of handling writes means that if it fails, the infrastructure loses the ability to process database updates, causing downtime.
+- Solution: Implement a failover system to promote a Replica (Slave) to become the Primary in case of failure, or use a MySQL cluster for high availability.
+
+3. **All Components on Same Servers**
+- Issue: Having all infrastructure components (web server, application server, and database) on the same physical servers can lead to resource contention, where multiple services compete for the same CPU, memory, and disk resources, degrading performance.
+- Solution: Separate services across dedicated servers, or use containerization (e.g., Docker) to isolate each service for better resource management.
