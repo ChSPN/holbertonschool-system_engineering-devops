@@ -1,0 +1,82 @@
+# Advanced Infrastructure Design with Additional Server, Load Balancer Cluster, and Component Separation
+We are now further improving the infrastructure by adding a second load balancer for high availability and splitting the components (web server, application server, and database) into their own dedicated servers. This setup increases fault tolerance, scalability, and performance.
+
+1. ## Additional Server
+**Why We Add It:**
+- To distribute workloads across different specialized servers (web, application, and database), improving fault isolation and scalability.
+- Adding a dedicated server for each function allows better resource management, as web servers, application servers, and databases each have different performance requirements.
+
+2. ## Load Balancer Cluster (HAProxy)
+**Why We Add It:**
+- A Load Balancer Cluster adds redundancy and ensures high availability. If one load balancer fails, the other one takes over, eliminating the load balancer as a single point of failure (SPOF).
+- HAProxy Cluster uses Active-Passive configuration, where one load balancer actively handles traffic, while the second remains on standby and takes over only if the active one fails. Alternatively, we could configure an Active-Active setup to distribute the load between both load balancers.
+
+**How the Load Balancer Cluster Works:**
+- Active-Passive: The Primary load balancer (Load Balancer 1) actively distributes traffic to the web servers, while the Secondary load balancer (Load Balancer 2) remains passive, monitoring the health of the Primary. If the Primary load balancer fails, the Secondary automatically becomes active and continues handling traffic seamlessly.
+
+3. ## Splitting Components (Dedicated Servers for Web, Application, and Database)
+**Why We Add It:**
+- Resource Optimization: By separating web servers, application servers, and database servers, each can be scaled independently based on specific needs. For instance, if the application server needs more CPU resources, we can upgrade or add more application servers without affecting the web server or database performance.
+- Fault Isolation: If the web server crashes, it doesn’t affect the database or application server, improving reliability.
+- Better Security: Splitting the components reduces the attack surface. For example, database servers can be secured behind more restrictive firewalls since they only need to communicate with the application servers.
+
+### Web Servers (Nginx)
+**Why We Add It:**
+- The web servers handle incoming HTTP(S) requests from the load balancers and serve static content like HTML, CSS, and JavaScript.
+- By offloading this to dedicated servers, the application server can focus on executing business logic.
+
+### Application Servers
+**Why We Add It:**
+- The application servers handle requests that require dynamic processing, such as running server-side code, interacting with databases, and performing business logic.
+- With dedicated application servers, we can scale them independently to handle increased workloads without affecting the web server or database.
+
+### Database Servers (MySQL Primary-Replica)
+**Why We Add It:**
+- The database servers are separated from the application servers to allow the database to scale independently. This setup also improves performance by allowing the database to use dedicated resources (CPU, memory, disk).
+- The Primary node handles write operations, while Replicas are dedicated to handling read operations.
+
+## Updated Infrastructure Diagram
+**DNS (www.foobar.com):**
+Domain foobar.com (A record) → Load Balancer Cluster (two load balancers)
+
+**Load Balancer Cluster (HAProxy):**
+- Load Balancer 1: Active node
+- Load Balancer 2: Passive node (standby)
+- Distributes traffic across web servers using Round Robin or Least Connections.
+
+**Dedicated Web Servers (Nginx):**
+- Serve static content and forward dynamic requests to the application servers.
+
+**Dedicated Application Servers:**
+- Handle server-side logic and interact with the database.
+- Could be scaled separately depending on workload.
+
+**Dedicated Database Servers (MySQL Primary-Replica):**
+- Primary node for write operations.
+- Replica nodes for read operations, improving performance.
+
+## Issues Addressed and Benefits of This Setup
+- **Redundancy:** The load balancer cluster eliminates the load balancer as a single point of failure (SPOF). If one load balancer fails, the other seamlessly takes over.
+
+- **Scalability:**
+    - By separating web, application, and database servers, each can be scaled independently based on traffic demands.
+    - For example, more application servers can be added if the processing load increases, or more web servers can be added to handle more concurrent users.
+
+- **Fault Isolation:** Crashes or high resource usage in one layer (e.g., the application server) do not impact other layers (e.g., the web server or database).
+
+- **Security:** Each layer is protected by its own firewall, and sensitive services like databases are isolated from public exposure, improving overall security.
+
+## Specifics of New Components:
+**HAProxy Load Balancer Cluster:**
+- Active-Passive Setup: Ensures that even if one load balancer fails, the other one can take over seamlessly, preventing downtime.
+- Algorithm: Can still use Round Robin or Least Connections to distribute traffic between web servers.
+
+**Dedicated Web Servers:**
+- By offloading static content and request handling to these servers, the application servers are free to handle dynamic, resource-heavy tasks.
+
+**Dedicated Application Servers:**
+- These handle all server-side logic, and scaling them independently allows for greater flexibility in managing workloads.
+
+**Dedicated Database Servers:**
+- Primary-Replica Setup: Helps distribute the load by separating read and write operations.
+- The database server is now a standalone entity, capable of being scaled or tuned independently.
